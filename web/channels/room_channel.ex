@@ -14,7 +14,7 @@ defmodule FlaskOnPhoenix.RoomChannel do
     # Stickyモデル内のレコード数をカウント
     length = Sticky
     |> Sticky.record_length
-    |> FlaskOnPhoenix.Repo.all
+    |> Repo.all
 
     # 付与するＩＤを計算
     next_id = Enum.at(length, 0) + 1
@@ -25,7 +25,7 @@ defmodule FlaskOnPhoenix.RoomChannel do
     Repo.insert!(changeset)
 
     # 新規作成する付箋をクライアントへ送信
-    broadcast! socket, "sticky:create", %{id: next_id, left: params.left, top: params.top, backgroundColor: params.backgroundColor}
+    broadcast! socket, "sticky:create", params
     {:noreply, socket}
   end
 
@@ -41,12 +41,19 @@ defmodule FlaskOnPhoenix.RoomChannel do
       "text" => p
     }, socket) do
 
-    broadcast! socket, "sticky:modified", %{
-      id: a, left: b, top: c, width: d, height: e,
+    # 該当するIDのstickyデータを取得、updateデータ作成、update
+    sticky = Repo.get!(Sticky, a)
+    sticky_params = %{
+      left: b, top: c, width: d, height: e,
       scaleX: f, scaleY: g, angle: h, group_left: i, group_top: j,
       group_width: k, group_height: l, group_scaleX: m, group_scaleY: n, group_angle: o,
       text: p
     }
+    changeset = Sticky.changeset(sticky, sticky_params)
+    Repo.update(changeset)
+
+    # updateしたstickyデータをクライアントへ送信
+    broadcast! socket, "sticky:modified", Map.put(sticky_params, :id, a)
     {:noreply, socket}
   end
 end
