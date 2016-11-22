@@ -20,7 +20,10 @@ defmodule FlaskOnPhoenix.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", FlaskOnPhoenix do
-  #   pipe_through :api
-  # end
+  scope "/api", FlaskOnPhoenix do
+    pipe_through :api
+
+    # 付箋一覧取得(:index)
+    get  "/stickys", StickyController, :index
+  end
 end

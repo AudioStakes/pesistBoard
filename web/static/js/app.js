@@ -368,9 +368,49 @@ window.onload = function(){
         canvas.add(frame);
         canvas.sendToBack(frame);
       });
+
+      // 付箋を取得
+      function all() {
+        $.ajax({
+          url: "/api/stickys"
+        }).done((data) => {
+          console.log(data)
+
+          // 取得したデータをレンダーする
+          data.stickys.forEach( function(config){
+          console.log(config)
+          //矩形オブジェクトを作る
+          var sticky = new fabric.IText("テキスト",$.extend({}, defaultOptions, {
+            id: config.id,
+            left: config.left,
+            top: config.top,
+            backgroundColor: config.backgroundColor
+          }));
+          canvas.add(sticky);
+          })
+
+          // fabric.util.enlivenObjects([data], function(objects) {
+          //   objects.forEach(function(o) {
+          //     canvas.add(o);
+          //   });
+          // });
+
+          // data.forEach(function(o) {
+          // console.log(o)
+          //   canvas.add(o);
+          // })
+
+          // data.stickys.forEach((sticky) => canvas.add(sticky))
+        }).fail((data) => {
+          alert("付箋データをロードできませんでした")
+          console.log(data)
+        })
+      }
+      all()
     }
 
     for(var i=0; i < 2; i++) {
       createCanvas(i);
     }
+
 }
